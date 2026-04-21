@@ -1,0 +1,28 @@
+import Foundation
+import SwiftUI
+
+struct GridPosition: Hashable, Equatable {
+    let row: Int
+    let col: Int
+}
+
+enum GameScreen {
+    case title
+    case playing
+    case gameOver(finalScore: Int)
+}
+
+struct GameConfig {
+    static let rows = 5
+    static let cols = 6
+    static let sessionDuration: TimeInterval = 120 // 2 minutes
+    static let dragDuration: TimeInterval = 8 // seconds
+    static let baseScore = 100
+    static let extraPerOrb = 50 // per orb over 3
+}
+
+extension Collection where Element == GridPosition {
+    func contains(_ r: Int, _ c: Int) -> Bool {
+        return self.contains { $0.row == r && $0.col == c }
+    }
+}
