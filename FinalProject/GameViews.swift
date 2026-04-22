@@ -1,4 +1,11 @@
 import SwiftUI
+import AudioToolbox
+
+private struct FingerTrailPoint: Identifiable {
+    let id = UUID()
+    let point: CGPoint
+    let timestamp: Date
+}
 
 struct TitleView: View {
     let start: () -> Void
@@ -43,6 +50,10 @@ struct GameOverView: View {
 
 struct GameView: View {
     @ObservedObject var vm: GameViewModel
+    @State private var dragOverlayPoint: CGPoint? = nil
+    @State private var lastSwapTick: Int = 0
+    private let swapSoundId: SystemSoundID = 1104
+    @State private var fingerTrail: [FingerTrailPoint] = []
     let endGame: () -> Void
 
     @State private var comboPop = false
@@ -62,6 +73,12 @@ struct GameView: View {
             guard vm.comboCount > 0 else { return }
             comboPop = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { comboPop = false }
+        }
+        .onChange(of: vm.swapTick) { _, newVal in
+            if newVal != lastSwapTick {
+                AudioServicesPlaySystemSound(swapSoundId)
+                lastSwapTick = newVal
+            }
         }
         .onChange(of: vm.sessionTimeRemaining) { _, newVal in
             if newVal <= 0 { endGame() }
@@ -123,11 +140,19 @@ struct GameView: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.3)))
 
                 // Trailing effect
-                ForEach(Array(vm.dragTrail.enumerated()), id: \.offset) { idx, pos in
-                    Circle()
-                        .fill(Color.white.opacity(0.15))
-                        .frame(width: cellSize * (0.6 - CGFloat(idx) * 0.04), height: cellSize * (0.6 - CGFloat(idx) * 0.04))
-                        .position(cellCenter(for: pos, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY))
+                if fingerTrail.count > 1 {
+                    ForEach(0..<(fingerTrail.count - 1), id: \.self) { idx in
+                        let start = fingerTrail[idx]
+                        let end = fingerTrail[idx + 1]
+                        let age = Date().timeIntervalSince(start.timestamp)
+                        let opacity = max(0.1, 1.0 - age / 0.35)
+                        Path { path in
+                            path.move(to: start.point)
+                            path.addLine(to: end.point)
+                        }
+                        .stroke(Color.white.opacity(opacity), style: StrokeStyle(lineWidth: cellSize * 0.14, lineCap: .round, lineJoin: .round))
+                        .shadow(color: Color.white.opacity(opacity * 0.6), radius: 4)
+                    }
                 }
 
                 // Orbs
@@ -135,15 +160,32 @@ struct GameView: View {
                     ForEach(0..<GameConfig.cols, id: \.self) { c in
                         let pos = GridPosition(row: r, col: c)
                         if let orb = vm.board[r][c] {
-                            Circle()
-                                .fill(orb.color)
-                                .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 2))
-                                .frame(width: cellSize * 0.9, height: cellSize * 0.9)
-                                .position(cellCenter(for: pos, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY))
-                                .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.7), value: vm.board)
+                            Group {
+                                if !(vm.isDragging && vm.dragCurrent == pos) {
+                                    Circle()
+                                        .fill(orb.color)
+                                        .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 2))
+                                        .frame(width: cellSize * 0.9, height: cellSize * 0.9)
+                                        .position(cellCenter(for: pos, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY))
+                                        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.7), value: vm.board)
+                                }
+                            }
                         }
                     }
                 }
+
+                if vm.isDragging, let current = vm.dragCurrent, let originOrb = vm.board[current.row][current.col] {
+                    let point: CGPoint = dragOverlayPoint ?? cellCenter(for: current, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY)
+                    Circle()
+                        .fill(originOrb.color)
+                        .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 3))
+                        .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 6)
+                        .frame(width: cellSize * 1.0, height: cellSize * 1.0)
+                        .position(point)
+                        .transition(.scale)
+                        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: vm.isDragging)
+                }
+
             }
             .contentShape(Rectangle())
             .gesture(dragGesture(cellSize: cellSize, offsetX: offsetX, offsetY: offsetY))
@@ -160,8 +202,15 @@ struct GameView: View {
                 } else {
                     vm.updateDrag(to: p)
                 }
+                dragOverlayPoint = value.location
+
+                let now = Date()
+                fingerTrail.append(FingerTrailPoint(point: value.location, timestamp: now))
+                fingerTrail.removeAll { now.timeIntervalSince($0.timestamp) > 0.35 }
             }
             .onEnded { _ in
+                dragOverlayPoint = nil
+                fingerTrail = []
                 vm.finishDrag()
             }
     }

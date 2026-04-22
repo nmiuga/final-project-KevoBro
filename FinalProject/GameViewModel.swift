@@ -17,6 +17,7 @@ final class GameViewModel: ObservableObject {
     @Published var dragCurrent: GridPosition? // current cell of dragged orb
     @Published var dragTrail: [GridPosition] = [] // recent path for trailing effect
     @Published var dragTimeRemaining: TimeInterval = 0
+    @Published var swapTick: Int = 0
 
     // UI flags
     @Published var showPauseOverlay: Bool = false
@@ -158,6 +159,7 @@ final class GameViewModel: ObservableObject {
         let tmp = board[a.row][a.col]
         board[a.row][a.col] = board[b.row][b.col]
         board[b.row][b.col] = tmp
+        swapTick += 1
     }
 
     // MARK: - Resolution Loop
