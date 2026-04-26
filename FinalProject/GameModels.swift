@@ -26,6 +26,20 @@ extension Collection where Element == GridPosition {
         return self.contains { $0.row == r && $0.col == c }
     }
 }
+
+struct CapybaraSprites {
+    static let idle = "IdleCapybara"
+    // All non-idle capybara sprite asset names
+    static let others: [String] = [
+        "FullCapybara",
+        "MunchCapybara",
+        "StarEyes",
+        "StrawberryEyes",
+        "WowCapybara",
+        "YayCapybara"
+    ]
+}
+
 struct ComboPopup: Identifiable, Equatable {
     let id = UUID()
     let group: [GridPosition]

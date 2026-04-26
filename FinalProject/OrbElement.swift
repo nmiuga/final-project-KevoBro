@@ -12,4 +12,14 @@ enum OrbElement: CaseIterable, Identifiable, Equatable {
         case .purple: return .purple
         }
     }
+    
+    var assetName: String {
+        switch self {
+        case .red: return "StrawberryIcon"
+        case .blue: return "BlueberryIcon"
+        case .green: return "GrapeIcon"
+        case .yellow: return "LemonIcon"
+        case .purple: return "PurpleGrapeIcon"
+        }
+    }
 }

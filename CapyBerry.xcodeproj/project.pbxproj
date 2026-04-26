@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2C472F7D2F8D50A700F8F435 /* FinalProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinalProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		2C472F8A2F8D50A800F8F435 /* FinalProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FinalProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2C472F942F8D50A800F8F435 /* FinalProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FinalProjectUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C472F7D2F8D50A700F8F435 /* CapyBerry.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CapyBerry.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C472F8A2F8D50A800F8F435 /* CapyBerryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CapyBerryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C472F942F8D50A800F8F435 /* CapyBerryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CapyBerryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -85,9 +85,9 @@
 		2C472F7E2F8D50A700F8F435 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2C472F7D2F8D50A700F8F435 /* FinalProject.app */,
-				2C472F8A2F8D50A800F8F435 /* FinalProjectTests.xctest */,
-				2C472F942F8D50A800F8F435 /* FinalProjectUITests.xctest */,
+				2C472F7D2F8D50A700F8F435 /* CapyBerry.app */,
+				2C472F8A2F8D50A800F8F435 /* CapyBerryTests.xctest */,
+				2C472F942F8D50A800F8F435 /* CapyBerryUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +95,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2C472F7C2F8D50A700F8F435 /* FinalProject */ = {
+		2C472F7C2F8D50A700F8F435 /* CapyBerry */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2C472F9E2F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "FinalProject" */;
+			buildConfigurationList = 2C472F9E2F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "CapyBerry" */;
 			buildPhases = (
 				2C472F792F8D50A700F8F435 /* Sources */,
 				2C472F7A2F8D50A700F8F435 /* Frameworks */,
@@ -110,16 +110,16 @@
 			fileSystemSynchronizedGroups = (
 				2C472F7F2F8D50A700F8F435 /* FinalProject */,
 			);
-			name = FinalProject;
+			name = CapyBerry;
 			packageProductDependencies = (
 			);
 			productName = FinalProject;
-			productReference = 2C472F7D2F8D50A700F8F435 /* FinalProject.app */;
+			productReference = 2C472F7D2F8D50A700F8F435 /* CapyBerry.app */;
 			productType = "com.apple.product-type.application";
 		};
-		2C472F892F8D50A800F8F435 /* FinalProjectTests */ = {
+		2C472F892F8D50A800F8F435 /* CapyBerryTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2C472FA12F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "FinalProjectTests" */;
+			buildConfigurationList = 2C472FA12F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "CapyBerryTests" */;
 			buildPhases = (
 				2C472F862F8D50A800F8F435 /* Sources */,
 				2C472F872F8D50A800F8F435 /* Frameworks */,
@@ -133,16 +133,16 @@
 			fileSystemSynchronizedGroups = (
 				2C472F8D2F8D50A800F8F435 /* FinalProjectTests */,
 			);
-			name = FinalProjectTests;
+			name = CapyBerryTests;
 			packageProductDependencies = (
 			);
 			productName = FinalProjectTests;
-			productReference = 2C472F8A2F8D50A800F8F435 /* FinalProjectTests.xctest */;
+			productReference = 2C472F8A2F8D50A800F8F435 /* CapyBerryTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		2C472F932F8D50A800F8F435 /* FinalProjectUITests */ = {
+		2C472F932F8D50A800F8F435 /* CapyBerryUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2C472FA42F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "FinalProjectUITests" */;
+			buildConfigurationList = 2C472FA42F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "CapyBerryUITests" */;
 			buildPhases = (
 				2C472F902F8D50A800F8F435 /* Sources */,
 				2C472F912F8D50A800F8F435 /* Frameworks */,
@@ -156,11 +156,11 @@
 			fileSystemSynchronizedGroups = (
 				2C472F972F8D50A800F8F435 /* FinalProjectUITests */,
 			);
-			name = FinalProjectUITests;
+			name = CapyBerryUITests;
 			packageProductDependencies = (
 			);
 			productName = FinalProjectUITests;
-			productReference = 2C472F942F8D50A800F8F435 /* FinalProjectUITests.xctest */;
+			productReference = 2C472F942F8D50A800F8F435 /* CapyBerryUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2C472F782F8D50A700F8F435 /* Build configuration list for PBXProject "FinalProject" */;
+			buildConfigurationList = 2C472F782F8D50A700F8F435 /* Build configuration list for PBXProject "CapyBerry" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -200,9 +200,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2C472F7C2F8D50A700F8F435 /* FinalProject */,
-				2C472F892F8D50A800F8F435 /* FinalProjectTests */,
-				2C472F932F8D50A800F8F435 /* FinalProjectUITests */,
+				2C472F7C2F8D50A700F8F435 /* CapyBerry */,
+				2C472F892F8D50A800F8F435 /* CapyBerryTests */,
+				2C472F932F8D50A800F8F435 /* CapyBerryUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +258,12 @@
 /* Begin PBXTargetDependency section */
 		2C472F8C2F8D50A800F8F435 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2C472F7C2F8D50A700F8F435 /* FinalProject */;
+			target = 2C472F7C2F8D50A700F8F435 /* CapyBerry */;
 			targetProxy = 2C472F8B2F8D50A800F8F435 /* PBXContainerItemProxy */;
 		};
 		2C472F962F8D50A800F8F435 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2C472F7C2F8D50A700F8F435 /* FinalProject */;
+			target = 2C472F7C2F8D50A700F8F435 /* CapyBerry */;
 			targetProxy = 2C472F952F8D50A800F8F435 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -472,7 +472,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinalProject.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinalProject";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CapyBerry.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CapyBerry";
 			};
 			name = Debug;
 		};
@@ -494,7 +494,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinalProject.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinalProject";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CapyBerry.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CapyBerry";
 			};
 			name = Release;
 		};
@@ -541,7 +541,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2C472F782F8D50A700F8F435 /* Build configuration list for PBXProject "FinalProject" */ = {
+		2C472F782F8D50A700F8F435 /* Build configuration list for PBXProject "CapyBerry" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2C472F9C2F8D50A800F8F435 /* Debug */,
@@ -550,7 +550,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2C472F9E2F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "FinalProject" */ = {
+		2C472F9E2F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "CapyBerry" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2C472F9F2F8D50A800F8F435 /* Debug */,
@@ -559,7 +559,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2C472FA12F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "FinalProjectTests" */ = {
+		2C472FA12F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "CapyBerryTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2C472FA22F8D50A800F8F435 /* Debug */,
@@ -568,7 +568,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2C472FA42F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "FinalProjectUITests" */ = {
+		2C472FA42F8D50A800F8F435 /* Build configuration list for PBXNativeTarget "CapyBerryUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2C472FA52F8D50A800F8F435 /* Debug */,

@@ -11,6 +11,8 @@ final class GameViewModel: ObservableObject {
     @Published var isPaused: Bool = false
     @Published var isResolving: Bool = false
     @Published var comboPopups: [ComboPopup] = []
+    @Published var capybaraAssetName: String = CapybaraSprites.idle
+    @Published var capybaraJumpTick: Int = 0
     @Published var highlightedMatches: Set<GridPosition> = []
     @Published var fadingMatches: Set<GridPosition> = []
     @Published var sessionTimeRemaining: TimeInterval = GameConfig.sessionDuration
@@ -42,6 +44,8 @@ final class GameViewModel: ObservableObject {
         score = 0
         comboCount = 0
         comboPopups = []
+        capybaraAssetName = CapybaraSprites.idle
+        capybaraJumpTick += 1
         isPaused = false
         isResolving = false
         sessionTimeRemaining = GameConfig.sessionDuration
@@ -176,6 +180,13 @@ final class GameViewModel: ObservableObject {
         comboCount += 1
         let popup = ComboPopup(group: group, count: comboCount)
         comboPopups.append(popup)
+        // Update capybara sprite: first combo or every multiple of 3
+        if comboCount == 1 || comboCount % 3 == 0 {
+            if let next = CapybaraSprites.others.randomElement() {
+                capybaraAssetName = next
+                capybaraJumpTick += 1
+            }
+        }
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 700_000_000)
             self.comboPopups.removeAll { $0.id == popup.id }
@@ -229,6 +240,12 @@ final class GameViewModel: ObservableObject {
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 refill()
                 try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+
+            // When cascading ends (combo sequence is over), revert capybara to idle
+            if comboCount > 0 {
+                capybaraAssetName = CapybaraSprites.idle
+                capybaraJumpTick += 1
             }
 
             // Apply combo multiplier once all cascading is complete

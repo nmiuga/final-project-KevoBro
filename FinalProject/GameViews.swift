@@ -61,14 +61,24 @@ struct GameView: View {
     var body: some View {
         VStack(spacing: 12) {
             topBar
-            Spacer(minLength: 0)
             boardView
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .aspectRatio(CGFloat(GameConfig.cols) / CGFloat(GameConfig.rows), contentMode: .fit)
+                .padding(.top, 60)
                 .padding(.horizontal, 16)
             Spacer(minLength: 0)
         }
-        .overlay { if vm.showPauseOverlay { pauseOverlay } }
+        .overlay(alignment: .bottomTrailing) {
+            ZStack {
+                if vm.showPauseOverlay { pauseOverlay }
+                if !vm.showPauseOverlay {
+                    CapybaraView(assetName: vm.capybaraAssetName, jumpTick: vm.capybaraJumpTick)
+                        .padding(.trailing, 12)
+                        .padding(.bottom, 8)
+                        .allowsHitTesting(false)
+                }
+            }
+        }
         .onChange(of: vm.comboCount) { _, _ in
             guard vm.comboCount > 0 else { return }
             comboPop = true
@@ -145,10 +155,12 @@ struct GameView: View {
                             let opacity: CGFloat = isFading ? 0.0 : 1.0
                             Group {
                                 if !isHiddenByDrag {
-                                    Circle()
-                                        .fill(orb.color)
-                                        .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 2))
+                                    Image(orb.assetName)
+                                        .resizable()
+                                        .scaledToFill()
                                         .frame(width: cellSize * 0.9, height: cellSize * 0.9)
+                                        .clipShape(Circle())
+                                        .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 2))
                                         .position(cellCenter(for: pos, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY))
                                         .scaleEffect(scale)
                                         .opacity(opacity)
@@ -165,14 +177,30 @@ struct GameView: View {
                 // Dragging orb overlay
                 if vm.isDragging, let current = vm.dragCurrent, let originOrb = vm.board[current.row][current.col] {
                     let point: CGPoint = dragOverlayPoint ?? cellCenter(for: current, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY)
-                    Circle()
-                        .fill(originOrb.color)
+                    Image(originOrb.assetName)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: cellSize * 1.0, height: cellSize * 1.0)
+                        .clipShape(Circle())
                         .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 3))
                         .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 6)
-                        .frame(width: cellSize * 1.0, height: cellSize * 1.0)
                         .position(point)
                         .transition(.scale)
                         .animation(.spring(response: 0.2, dampingFraction: 0.7), value: vm.isDragging)
+                }
+
+                // Drag timer indicator above finger
+                if vm.isDragging {
+                    if let current = vm.dragCurrent {
+                        let point: CGPoint = dragOverlayPoint ?? cellCenter(for: current, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY)
+                        DragTimerIndicator(fraction: max(0, min(1, vm.dragTimeRemaining / GameConfig.dragDuration)))
+                            .position(x: point.x, y: point.y - cellSize * 0.9)
+                            .allowsHitTesting(false)
+                    } else if let p = dragOverlayPoint {
+                        DragTimerIndicator(fraction: max(0, min(1, vm.dragTimeRemaining / GameConfig.dragDuration)))
+                            .position(x: p.x, y: p.y - cellSize * 0.9)
+                            .allowsHitTesting(false)
+                    }
                 }
 
                 // Combo popups over matched groups
@@ -308,6 +336,67 @@ private struct ComboCountBubble: View {
                 .fill(Color.black.opacity(0.55))
                 .overlay(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1))
         }
+    }
+}
+
+private struct CapybaraView: View {
+    let assetName: String
+    let jumpTick: Int
+    @State private var jumpOffset: CGFloat = 0
+    var body: some View {
+        Image(assetName)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 240, height: 240)
+            .offset(y: jumpOffset)
+            .onChange(of: jumpTick) { _, _ in
+                jump()
+            }
+            .onAppear {
+                // ensure an initial state
+                jumpOffset = 0
+            }
+    }
+
+    private func jump() {
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.45)) {
+            jumpOffset = -14
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                jumpOffset = 0
+            }
+        }
+    }
+}
+
+private struct DragTimerIndicator: View {
+    let fraction: Double // 0...1 remaining
+
+    private var arcColor: Color {
+        // Map remaining fraction (0..1) to hue from red(0.0) -> yellow(~0.16) -> green(~0.33)
+        // Using a simple hue mapping: hue = fraction * 0.33
+        let clamped = max(0, min(1, fraction))
+        let hue = clamped * 0.33
+        return Color(hue: hue, saturation: 0.95, brightness: 1.0)
+    }
+
+    var body: some View {
+        ZStack {
+            // Thin background ring
+            Circle()
+                .stroke(Color.white.opacity(0.25), lineWidth: 2)
+
+            // Foreground arc showing remaining time
+            Circle()
+                .trim(from: 0, to: max(0, min(1, fraction)))
+                .rotation(Angle(degrees: -90))
+                .stroke(arcColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+        }
+        .frame(width: 26, height: 26)
+        .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+        .opacity(0.85)
+        .animation(.linear(duration: 0.05), value: fraction)
     }
 }
 
