@@ -26,3 +26,9 @@ extension Collection where Element == GridPosition {
         return self.contains { $0.row == r && $0.col == c }
     }
 }
+struct ComboPopup: Identifiable, Equatable {
+    let id = UUID()
+    let group: [GridPosition]
+    let count: Int
+}
+

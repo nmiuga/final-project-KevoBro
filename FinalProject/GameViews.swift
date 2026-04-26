@@ -90,14 +90,8 @@ struct GameView: View {
             Text(timeString(vm.sessionTimeRemaining))
                 .monospacedDigit()
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text("Combo \(vm.comboCount)")
-                .font(.headline)
-                .scaleEffect(comboPop ? 1.2 : 1.0)
-                .foregroundStyle(comboPop ? .yellow : .primary)
-                .animation(.spring(response: 0.25, dampingFraction: 0.5), value: comboPop)
-                .frame(maxWidth: .infinity)
             Text("Score \(vm.score)")
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .center)
             Button(action: { vm.pauseGame() }) {
                 Image(systemName: "pause.fill")
                     .padding(8)
@@ -139,7 +133,56 @@ struct GameView: View {
                     .fill(Color.gray.opacity(0.15))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.3)))
 
-                // Trailing effect
+                // Orbs
+                ForEach(0..<GameConfig.rows, id: \.self) { r in
+                    ForEach(0..<GameConfig.cols, id: \.self) { c in
+                        let pos = GridPosition(row: r, col: c)
+                        if let orb = vm.board[r][c] {
+                            let isHiddenByDrag = vm.isDragging && vm.dragCurrent == pos
+                            let isHighlighted = vm.highlightedMatches.contains(pos)
+                            let isFading = vm.fadingMatches.contains(pos)
+                            let scale: CGFloat = isHighlighted ? 1.12 : 1.0
+                            let opacity: CGFloat = isFading ? 0.0 : 1.0
+                            Group {
+                                if !isHiddenByDrag {
+                                    Circle()
+                                        .fill(orb.color)
+                                        .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 2))
+                                        .frame(width: cellSize * 0.9, height: cellSize * 0.9)
+                                        .position(cellCenter(for: pos, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY))
+                                        .scaleEffect(scale)
+                                        .opacity(opacity)
+                                        .shadow(color: isHighlighted ? Color.white.opacity(0.9) : .clear, radius: 10)
+                                        .animation(.easeInOut(duration: 0.2), value: vm.board)
+                                        .animation(.easeInOut(duration: 0.2), value: vm.highlightedMatches)
+                                        .animation(.easeInOut(duration: 0.2), value: vm.fadingMatches)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Dragging orb overlay
+                if vm.isDragging, let current = vm.dragCurrent, let originOrb = vm.board[current.row][current.col] {
+                    let point: CGPoint = dragOverlayPoint ?? cellCenter(for: current, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY)
+                    Circle()
+                        .fill(originOrb.color)
+                        .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 3))
+                        .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 6)
+                        .frame(width: cellSize * 1.0, height: cellSize * 1.0)
+                        .position(point)
+                        .transition(.scale)
+                        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: vm.isDragging)
+                }
+
+                // Combo popups over matched groups
+                ForEach(vm.comboPopups) { popup in
+                    let center = groupCenter(popup.group, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY)
+                    ComboCountBubble(count: popup.count)
+                        .position(center)
+                }
+
+                // Trailing effect (above orbs and drag overlay)
                 if fingerTrail.count > 1 {
                     ForEach(0..<(fingerTrail.count - 1), id: \.self) { idx in
                         let start = fingerTrail[idx]
@@ -154,38 +197,6 @@ struct GameView: View {
                         .shadow(color: Color.white.opacity(opacity * 0.6), radius: 4)
                     }
                 }
-
-                // Orbs
-                ForEach(0..<GameConfig.rows, id: \.self) { r in
-                    ForEach(0..<GameConfig.cols, id: \.self) { c in
-                        let pos = GridPosition(row: r, col: c)
-                        if let orb = vm.board[r][c] {
-                            Group {
-                                if !(vm.isDragging && vm.dragCurrent == pos) {
-                                    Circle()
-                                        .fill(orb.color)
-                                        .overlay(Circle().stroke(Color.white.opacity(0.25), lineWidth: 2))
-                                        .frame(width: cellSize * 0.9, height: cellSize * 0.9)
-                                        .position(cellCenter(for: pos, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY))
-                                        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.7), value: vm.board)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if vm.isDragging, let current = vm.dragCurrent, let originOrb = vm.board[current.row][current.col] {
-                    let point: CGPoint = dragOverlayPoint ?? cellCenter(for: current, cellSize: cellSize, offsetX: offsetX, offsetY: offsetY)
-                    Circle()
-                        .fill(originOrb.color)
-                        .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 3))
-                        .shadow(color: .black.opacity(0.25), radius: 10, x: 0, y: 6)
-                        .frame(width: cellSize * 1.0, height: cellSize * 1.0)
-                        .position(point)
-                        .transition(.scale)
-                        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: vm.isDragging)
-                }
-
             }
             .contentShape(Rectangle())
             .gesture(dragGesture(cellSize: cellSize, offsetX: offsetX, offsetY: offsetY))
@@ -237,3 +248,66 @@ struct GameView: View {
         return String(format: "%d:%02d", m, s)
     }
 }
+private func groupCenter(_ group: [GridPosition], cellSize: CGFloat, offsetX: CGFloat, offsetY: CGFloat) -> CGPoint {
+    guard !group.isEmpty else { return CGPoint(x: offsetX, y: offsetY) }
+    let xs = group.map { offsetX + (CGFloat($0.col) + 0.5) * cellSize }
+    let ys = group.map { offsetY + (CGFloat($0.row) + 0.5) * cellSize }
+    let cx = xs.reduce(0, +) / CGFloat(xs.count)
+    let cy = ys.reduce(0, +) / CGFloat(ys.count)
+    return CGPoint(x: cx, y: cy)
+}
+
+private struct ComboCountBubble: View {
+    let count: Int
+    @State private var appear = false
+    @State private var gradientAngle: Double = 0
+
+    private let cycleColors: [Color] = [.red, .blue, .green, .purple, .yellow]
+
+    var body: some View {
+        Text("\(count)x")
+            .font(.system(size: 28, weight: .bold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(bubbleBackground)
+            .scaleEffect(appear ? 1.2 : 0.6)
+            .opacity(appear ? 1.0 : 0.0)
+            .onAppear {
+                withAnimation(.spring(response: 0.18, dampingFraction: 0.55)) {
+                    appear = true
+                }
+                if count >= 7 {
+                    withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
+                        gradientAngle = 360
+                    }
+                }
+                // Fade away shortly after pop
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    withAnimation(.easeOut(duration: 0.25)) {
+                        appear = false
+                    }
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var bubbleBackground: some View {
+        if count >= 7 {
+            Capsule()
+                .fill(AngularGradient(colors: cycleColors + [cycleColors.first!], center: .center))
+                .rotationEffect(.degrees(gradientAngle))
+                .overlay(Capsule().stroke(Color.white.opacity(0.6), lineWidth: 1))
+        } else if count >= 3 {
+            let idx = (count - 3) % cycleColors.count
+            Capsule()
+                .fill(cycleColors[idx].opacity(0.85))
+                .overlay(Capsule().stroke(Color.white.opacity(0.6), lineWidth: 1))
+        } else {
+            Capsule()
+                .fill(Color.black.opacity(0.55))
+                .overlay(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1))
+        }
+    }
+}
+

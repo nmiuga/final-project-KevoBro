@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import AudioToolbox
 
 final class GameViewModel: ObservableObject {
     @Published var board: [[OrbElement?]] = [] // rows x cols
@@ -9,6 +10,9 @@ final class GameViewModel: ObservableObject {
     @Published var comboCount: Int = 0
     @Published var isPaused: Bool = false
     @Published var isResolving: Bool = false
+    @Published var comboPopups: [ComboPopup] = []
+    @Published var highlightedMatches: Set<GridPosition> = []
+    @Published var fadingMatches: Set<GridPosition> = []
     @Published var sessionTimeRemaining: TimeInterval = GameConfig.sessionDuration
 
     // Drag state
@@ -18,6 +22,8 @@ final class GameViewModel: ObservableObject {
     @Published var dragTrail: [GridPosition] = [] // recent path for trailing effect
     @Published var dragTimeRemaining: TimeInterval = 0
     @Published var swapTick: Int = 0
+
+    private let matchSoundId: SystemSoundID = 1114
 
     // UI flags
     @Published var showPauseOverlay: Bool = false
@@ -35,6 +41,7 @@ final class GameViewModel: ObservableObject {
         }
         score = 0
         comboCount = 0
+        comboPopups = []
         isPaused = false
         isResolving = false
         sessionTimeRemaining = GameConfig.sessionDuration
@@ -163,6 +170,18 @@ final class GameViewModel: ObservableObject {
     }
 
     // MARK: - Resolution Loop
+
+    @MainActor
+    private func emitComboPopup(for group: [GridPosition]) {
+        comboCount += 1
+        let popup = ComboPopup(group: group, count: comboCount)
+        comboPopups.append(popup)
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 700_000_000)
+            self.comboPopups.removeAll { $0.id == popup.id }
+        }
+    }
+
     func resolveBoard() {
         guard !isResolving else { return }
         isResolving = true
@@ -172,24 +191,53 @@ final class GameViewModel: ObservableObject {
             while true {
                 let groups = findMatchGroups()
                 if groups.isEmpty { break }
-                comboCount += groups.isEmpty ? 0 : 1
-                // Remove matches and score
+
+                // Each loop of groups is one combo step
+                // comboCount += 1  <-- removed this line
+
+                // Animate each group sequentially: highlight -> fade -> remove
+                for group in groups {
+                    // Increment combo per group and show popup
+                    emitComboPopup(for: group)
+
+                    // Highlight (scale up)
+                    highlightedMatches = Set(group)
+                    AudioServicesPlaySystemSound(matchSoundId)
+                    try? await Task.sleep(nanoseconds: 180_000_000)
+
+                    // Fade out
+                    fadingMatches = Set(group)
+                    try? await Task.sleep(nanoseconds: 180_000_000)
+
+                    // Remove from board
+                    for p in group {
+                        board[p.row][p.col] = nil
+                    }
+
+                    // Clear highlight/fade states before next group
+                    highlightedMatches = []
+                    fadingMatches = []
+                }
+
+                // Score this wave of groups (before gravity/refill)
                 let points = score(for: groups)
                 totalMovePoints += points
-                remove(groups: groups)
-                // Small delay to allow removal animation
-                try? await Task.sleep(nanoseconds: 250_000_000)
+
+                // Let removals settle, then apply gravity and refill
+                try? await Task.sleep(nanoseconds: 120_000_000)
                 applyGravity()
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 refill()
                 try? await Task.sleep(nanoseconds: 200_000_000)
             }
-            // Apply combo multiplier
+
+            // Apply combo multiplier once all cascading is complete
             if comboCount > 0 {
                 let multiplier = 1.0 + 0.25 * Double(comboCount - 1)
                 score += Int(Double(totalMovePoints) * multiplier)
                 updateHighScoreIfNeeded()
             }
+
             isResolving = false
             // Resume session timer when done
             startSessionTimerIfNeeded()
@@ -245,13 +293,15 @@ final class GameViewModel: ObservableObject {
 
         if marked.isEmpty { return [] }
 
-        // Group via BFS using 8-neighbor adjacency (including diagonals)
+        // Group via BFS using 8-neighbor adjacency (including diagonals),
+        // but require that all cells in a group share the same color.
         let dirs = [(1,0),(-1,0),(0,1),(0,-1),(1,1),(1,-1),(-1,1),(-1,-1)]
         var groups: [[GridPosition]] = []
         var visited = Set<GridPosition>()
 
         for start in marked {
             if visited.contains(start) { continue }
+            guard let startColor = board[start.row][start.col] else { continue }
             var queue: [GridPosition] = [start]
             var comp: [GridPosition] = []
             visited.insert(start)
@@ -263,7 +313,8 @@ final class GameViewModel: ObservableObject {
                     let nc = cur.col + dc
                     let next = GridPosition(row: nr, col: nc)
                     if nr >= 0, nr < rows, nc >= 0, nc < cols,
-                       marked.contains(next), !visited.contains(next) {
+                       marked.contains(next), !visited.contains(next),
+                       let color = board[nr][nc], color == startColor {
                         visited.insert(next)
                         queue.append(next)
                     }
