@@ -64,7 +64,7 @@ struct GameView: View {
             boardView
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .aspectRatio(CGFloat(GameConfig.cols) / CGFloat(GameConfig.rows), contentMode: .fit)
-                .padding(.top, 60)
+                .padding(.top, 72)
                 .padding(.horizontal, 16)
             Spacer(minLength: 0)
         }
@@ -74,11 +74,17 @@ struct GameView: View {
                 if !vm.showPauseOverlay {
                     CapybaraView(assetName: vm.capybaraAssetName, jumpTick: vm.capybaraJumpTick)
                         .padding(.trailing, 12)
-                        .padding(.bottom, 8)
+                        .padding(.bottom, 60)
                         .allowsHitTesting(false)
                 }
             }
         }
+        .background(
+            ZStack {
+                AnimatedSkyBackground()
+                ForestForeground()
+            }
+        )
         .onChange(of: vm.comboCount) { _, _ in
             guard vm.comboCount > 0 else { return }
             comboPop = true
@@ -140,8 +146,8 @@ struct GameView: View {
             ZStack {
                 // Grid background
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.gray.opacity(0.15))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.3)))
+                    .fill(Color.gray.opacity(0.30))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.45)))
 
                 // Orbs
                 ForEach(0..<GameConfig.rows, id: \.self) { r in
@@ -374,18 +380,20 @@ private struct DragTimerIndicator: View {
     let fraction: Double // 0...1 remaining
 
     private var arcColor: Color {
-        // Map remaining fraction (0..1) to hue from red(0.0) -> yellow(~0.16) -> green(~0.33)
-        // Using a simple hue mapping: hue = fraction * 0.33
         let clamped = max(0, min(1, fraction))
-        let hue = clamped * 0.33
+        let hue = clamped * 0.33 // red -> yellow -> green
         return Color(hue: hue, saturation: 0.95, brightness: 1.0)
     }
 
     var body: some View {
         ZStack {
+            // Subtle outer outline
+            Circle()
+                .stroke(Color.black.opacity(0.45), lineWidth: 1)
+
             // Thin background ring
             Circle()
-                .stroke(Color.white.opacity(0.25), lineWidth: 2)
+                .stroke(Color.white.opacity(0.32), lineWidth: 2)
 
             // Foreground arc showing remaining time
             Circle()
@@ -394,9 +402,55 @@ private struct DragTimerIndicator: View {
                 .stroke(arcColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
         }
         .frame(width: 26, height: 26)
-        .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
-        .opacity(0.85)
+        .shadow(color: Color.black.opacity(0.25), radius: 2, x: 0, y: 1)
+        .opacity(0.9)
         .animation(.linear(duration: 0.05), value: fraction)
+    }
+}
+
+private struct AnimatedSkyBackground: View {
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            TimelineView(.animation) { context in
+                let t = context.date.timeIntervalSinceReferenceDate
+                let speed: Double = 20 // points per second
+                let offset = CGFloat((t * speed).truncatingRemainder(dividingBy: Double(w)))
+                HStack(spacing: 0) {
+                    Image("SkyBackground")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: w, height: h)
+                        .clipped()
+                    Image("SkyBackground")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: w, height: h)
+                        .clipped()
+                }
+                .offset(x: -offset)
+            }
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+    }
+}
+private struct ForestForeground: View {
+    var body: some View {
+        GeometryReader { geo in
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                Image("ForestBackground")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height * 0.80)
+                    .clipped()
+            }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .bottom)
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
     }
 }
 
