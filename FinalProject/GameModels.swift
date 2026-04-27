@@ -19,6 +19,7 @@ struct GameConfig {
     static let dragDuration: TimeInterval = 8 // seconds
     static let baseScore = 100
     static let extraPerOrb = 50 // per orb over 3
+    static let comboExpBase: Double = 1.3 // exponential combo multiplier base (>1 means growth)
 }
 
 extension Collection where Element == GridPosition {

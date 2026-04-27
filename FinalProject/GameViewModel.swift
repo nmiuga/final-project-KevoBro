@@ -248,10 +248,10 @@ final class GameViewModel: ObservableObject {
                 capybaraJumpTick += 1
             }
 
-            // Apply combo multiplier once all cascading is complete
+            // Apply exponential combo multiplier once all cascading is complete
             if comboCount > 0 {
-                let multiplier = 1.0 + 0.25 * Double(comboCount - 1)
-                score += Int(Double(totalMovePoints) * multiplier)
+                let multiplier = pow(GameConfig.comboExpBase, Double(comboCount - 1))
+                score += Int((Double(totalMovePoints) * multiplier).rounded())
                 updateHighScoreIfNeeded()
             }
 
