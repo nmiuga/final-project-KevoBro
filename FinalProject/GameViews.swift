@@ -10,16 +10,25 @@ private struct FingerTrailPoint: Identifiable {
 struct TitleView: View {
     let start: () -> Void
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            Text("CapyBerry")
-                .font(.system(size: 48, weight: .bold))
-            Button("Start Game", action: start)
-                .buttonStyle(.borderedProminent)
-                .font(.title2)
-            Spacer()
+        ZStack{
+            Image("FullForest")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+            VStack(spacing: 24) {
+                Spacer()
+                Image("Title")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 300, height: 300)
+                    .clipped()
+                Button("Start Game", action: start)
+                    .buttonStyle(.borderedProminent)
+                    .font(.custom("BubbleGum", size: 36))
+                Spacer()
+            }
+            
         }
-        .padding()
     }
 }
 
@@ -105,8 +114,12 @@ struct GameView: View {
         HStack {
             Text(timeString(vm.sessionTimeRemaining))
                 .monospacedDigit()
+                .font(.custom("BubbleGum", size: 24))
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Text("Score \(vm.score)")
+                .font(.custom("BubbleGum", size: 24))
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, alignment: .center)
             Button(action: { vm.pauseGame() }) {
                 Image(systemName: "pause.fill")

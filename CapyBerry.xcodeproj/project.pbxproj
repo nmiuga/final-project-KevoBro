@@ -27,6 +27,7 @@
 		2C472F7D2F8D50A700F8F435 /* CapyBerry.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CapyBerry.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C472F8A2F8D50A800F8F435 /* CapyBerryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CapyBerryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C472F942F8D50A800F8F435 /* CapyBerryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CapyBerryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C8445FA2F9FA8E80085611A /* CapyBerry-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "CapyBerry-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,7 @@
 		2C472F742F8D50A700F8F435 = {
 			isa = PBXGroup;
 			children = (
+				2C8445FA2F9FA8E80085611A /* CapyBerry-Info.plist */,
 				2C472F7F2F8D50A700F8F435 /* FinalProject */,
 				2C472F8D2F8D50A800F8F435 /* FinalProjectTests */,
 				2C472F972F8D50A800F8F435 /* FinalProjectUITests */,
@@ -400,6 +402,7 @@
 				DEVELOPMENT_TEAM = LUDDUQ9XMU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "CapyBerry-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -432,6 +435,7 @@
 				DEVELOPMENT_TEAM = LUDDUQ9XMU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "CapyBerry-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
