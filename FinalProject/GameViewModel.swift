@@ -16,6 +16,7 @@ final class GameViewModel: ObservableObject {
     @Published var highlightedMatches: Set<GridPosition> = []
     @Published var fadingMatches: Set<GridPosition> = []
     @Published var sessionTimeRemaining: TimeInterval = GameConfig.sessionDuration
+    @Published var timeAddedTick: Int = 0
 
     // Drag state
     @Published var isDragging: Bool = false
@@ -228,6 +229,12 @@ final class GameViewModel: ObservableObject {
                     // Clear highlight/fade states before next group
                     highlightedMatches = []
                     fadingMatches = []
+                    
+                    // Time bonus for very large groups
+                    if group.count >= 8 {
+                        sessionTimeRemaining += 5
+                        timeAddedTick += 1
+                    }
                 }
 
                 // Score this wave of groups (before gravity/refill)
@@ -246,6 +253,12 @@ final class GameViewModel: ObservableObject {
             if comboCount > 0 {
                 capybaraAssetName = CapybaraSprites.idle
                 capybaraJumpTick += 1
+            }
+
+            // Extra time bonus for high combo chains
+            if comboCount >= 8 {
+                sessionTimeRemaining += 10
+                timeAddedTick += 1
             }
 
             // Apply exponential combo multiplier once all cascading is complete
@@ -310,9 +323,9 @@ final class GameViewModel: ObservableObject {
 
         if marked.isEmpty { return [] }
 
-        // Group via BFS using 8-neighbor adjacency (including diagonals),
-        // but require that all cells in a group share the same color.
-        let dirs = [(1,0),(-1,0),(0,1),(0,-1),(1,1),(1,-1),(-1,1),(-1,-1)]
+        // Group via BFS using 4-neighbor adjacency (no diagonals),
+        // and require that all cells in a group share the same color.
+        let dirs = [(1,0),(-1,0),(0,1),(0,-1)]
         var groups: [[GridPosition]] = []
         var visited = Set<GridPosition>()
 
@@ -381,12 +394,23 @@ final class GameViewModel: ObservableObject {
     }
 
     private func score(for groups: [[GridPosition]]) -> Int {
-        // Count group sizes and use scoring rule: 100 + 50 * (n - 3) for each group size n
+        // Exponential growth for extra orbs beyond 3.
+        // For a group size n >= 3:
+        //   base = GameConfig.baseScore (for the first 3)
+        //   extra = GameConfig.extraPerOrb * sum_{k=0..(e-1)} (groupExpBase^k), where e = n - 3
+        // This yields extra = extraPerOrb * (groupExpBase^e - 1) / (groupExpBase - 1)
         var total = 0
         for group in groups {
             let n = group.count
-            if n >= 3 {
-                total += GameConfig.baseScore + GameConfig.extraPerOrb * (n - 3)
+            guard n >= 3 else { continue }
+            let e = max(0, n - 3)
+            let base = GameConfig.baseScore
+            if e == 0 {
+                total += base
+            } else {
+                let extraSeries = (pow(GameConfig.groupExpBase, Double(e)) - 1.0) / (GameConfig.groupExpBase - 1.0)
+                let extra = Double(GameConfig.extraPerOrb) * extraSeries
+                total += Int((Double(base) + extra).rounded())
             }
         }
         return total

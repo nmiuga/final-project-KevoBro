@@ -5,7 +5,10 @@
 3. Adjusted sizing of the capybara avatar.
 4. Adjusted top margin of the puzzle board. 
 5. Adjusted values for when match animations would play. 
-6. Added custom app icon
+6. Added custom app icon.
+7. Added title icon to Title screen and adjusted formatting.
+8. Added background image to Title screen.
+9. Added custom font 
 
 AI-assisted edits
 

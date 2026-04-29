@@ -1,6 +1,24 @@
 import SwiftUI
 import AudioToolbox
 
+private struct BubblegumText: ViewModifier {
+    let size: CGFloat
+    func body(content: Content) -> some View {
+        content
+            .font(.custom("Bubblegum", size: size))
+            .foregroundStyle(.white)
+            // Thin black outline via multi-directional shadows
+            .shadow(color: .black.opacity(0.9), radius: 0, x: 0.6, y: 0.6)
+            .shadow(color: .black.opacity(0.9), radius: 0, x: -0.6, y: 0.6)
+            .shadow(color: .black.opacity(0.9), radius: 0, x: 0.6, y: -0.6)
+            .shadow(color: .black.opacity(0.9), radius: 0, x: -0.6, y: -0.6)
+    }
+}
+
+private extension View {
+    func bubblegumStyle(size: CGFloat) -> some View { self.modifier(BubblegumText(size: size)) }
+}
+
 private struct FingerTrailPoint: Identifiable {
     let id = UUID()
     let point: CGPoint
@@ -16,15 +34,20 @@ struct TitleView: View {
                 .scaledToFill()
                 .ignoresSafeArea()
             VStack(spacing: 24) {
-                Spacer()
                 Image("Title")
                     .resizable()
-                    .scaledToFill()
-                    .frame(width: 300, height: 300)
-                    .clipped()
-                Button("Start Game", action: start)
-                    .buttonStyle(.borderedProminent)
-                    .font(.custom("BubbleGum", size: 36))
+                    .scaledToFit()
+                    .frame(maxWidth: 360)
+                    .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
+                    .padding(.top, 60)
+
+
+                Button(action: start) {
+                    Text("Start Game").bubblegumStyle(size: 36)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.pink)
+
                 Spacer()
             }
             
@@ -38,22 +61,38 @@ struct GameOverView: View {
     let playAgain: () -> Void
     let quit: () -> Void
     var body: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            Text("Game Over")
-                .font(.largeTitle.bold())
-            Text("Score: \(score)")
-                .font(.title2)
-            Text("High Score: \(highScore)")
-                .font(.title3)
-            HStack(spacing: 16) {
-                Button("Play Again", action: playAgain)
+        
+        ZStack {
+            Image("FullForest")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.45)))
+            Image("Plank")
+                .resizable()
+                .frame(width: 400, height: 300)
+            
+                VStack(spacing: 16) {
+                Spacer()
+                Text("Game Over")
+                    .bubblegumStyle(size: 40)
+                Text("Score: \(score)")
+                    .bubblegumStyle(size: 24)
+                Text("High Score: \(highScore)")
+                    .bubblegumStyle(size: 20)
+                HStack(spacing: 16) {
+                    Button(action: playAgain) {
+                        Text("Play Again").bubblegumStyle(size: 20)
+                    }
                     .buttonStyle(.borderedProminent)
-                Button("Quit", action: quit)
+                    Button(action: quit) {
+                        Text("Quit").bubblegumStyle(size: 20)
+                    }
+                }
+                Spacer()
             }
-            Spacer()
+            .padding()
         }
-        .padding()
     }
 }
 
@@ -81,12 +120,23 @@ struct GameView: View {
             ZStack {
                 if vm.showPauseOverlay { pauseOverlay }
                 if !vm.showPauseOverlay {
-                    CapybaraView(assetName: vm.capybaraAssetName, jumpTick: vm.capybaraJumpTick)
-                        .padding(.trailing, 12)
-                        .padding(.bottom, 60)
-                        .allowsHitTesting(false)
+                    HStack(alignment: .bottom, spacing: 12) {
+                        
+                        TimerPill(text: timeString(vm.sessionTimeRemaining))
+                            .allowsHitTesting(false)
+                            .padding(.bottom, 72)
+                        
+                        CapybaraView(assetName: vm.capybaraAssetName, jumpTick: vm.capybaraJumpTick)
+                            .allowsHitTesting(false)
+                    }
+                    .padding(.trailing, 12)
+                    .padding(.bottom, 60)
                 }
             }
+        }
+        .overlay {
+            TimeAddedOverlay(tick: vm.timeAddedTick)
+                .allowsHitTesting(false)
         }
         .background(
             ZStack {
@@ -112,34 +162,41 @@ struct GameView: View {
 
     private var topBar: some View {
         HStack {
-            Text(timeString(vm.sessionTimeRemaining))
-                .monospacedDigit()
-                .font(.custom("BubbleGum", size: 24))
-                .foregroundStyle(.primary)
+            VStack(spacing: 0) {
+                Text("Score")
+                    .bubblegumStyle(size: 18)
+                    .lineLimit(1)
+                Text("\(vm.score)")
+                    .bubblegumStyle(size: 34)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            Spacer()
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text("Score \(vm.score)")
-                .font(.custom("BubbleGum", size: 24))
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity, alignment: .center)
             Button(action: { vm.pauseGame() }) {
                 Image(systemName: "pause.fill")
-                    .padding(8)
+                    .foregroundColor(.white)
+                    .padding(10)
+                    .background(Circle().fill(Color.black.opacity(0.7)))
+                    .overlay(Circle().stroke(Color.white.opacity(0.6), lineWidth: 1))
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
         }
         .padding(.horizontal)
+        .frame(height: 72)
     }
 
     private var pauseOverlay: some View {
         ZStack {
             Color.black.opacity(0.4).ignoresSafeArea()
             VStack(spacing: 12) {
-                Text("Paused").font(.title2.bold())
+                Text("Paused").bubblegumStyle(size: 28)
                 HStack(spacing: 12) {
-                    Button("Resume") { vm.resumeGame() }
+                    Button(action: { vm.resumeGame() }) { Text("Resume").bubblegumStyle(size: 18) }
                         .buttonStyle(.borderedProminent)
-                    Button("Restart") { vm.restartGamePreservingHighScore() }
-                    Button("Title") { endGame() }
+                    Button(action: { vm.restartGamePreservingHighScore() }) { Text("Restart").bubblegumStyle(size: 18) }
+                    Button(action: { endGame() }) { Text("Title").bubblegumStyle(size: 18) }
                 }
             }
             .padding()
@@ -313,7 +370,7 @@ private struct ComboCountBubble: View {
 
     var body: some View {
         Text("\(count)x")
-            .font(.system(size: 28, weight: .bold))
+            .font(.custom("Bubblegum", size: 28))
             .foregroundStyle(.white)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
@@ -386,6 +443,21 @@ private struct CapybaraView: View {
                 jumpOffset = 0
             }
         }
+    }
+}
+
+private struct TimerPill: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .bubblegumStyle(size: 52)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(Color.black.opacity(0.55))
+                    .overlay(Capsule().stroke(Color.white.opacity(0.6), lineWidth: 1))
+            )
     }
 }
 
@@ -464,6 +536,55 @@ private struct ForestForeground: View {
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
+    }
+}
+
+private struct TimeAddedOverlay: View {
+    let tick: Int
+    @State private var visible = false
+    @State private var angle: Double = 0
+    var body: some View {
+        ZStack {
+            if visible {
+                ZStack {
+                    // Black outlined base
+                    Text("Time Added!")
+                        .font(.custom("Bubblegum", size: 44))
+                        .foregroundStyle(.black)
+                        .shadow(color: .black, radius: 0, x: 1, y: 1)
+                        .shadow(color: .black, radius: 0, x: -1, y: 1)
+                        .shadow(color: .black, radius: 0, x: 1, y: -1)
+                        .shadow(color: .black, radius: 0, x: -1, y: -1)
+                    // Animated rainbow fill masked by text
+                    AngularGradient(colors: [.red, .orange, .yellow, .green, .blue, .purple, .red], center: .center, angle: .degrees(angle))
+                        .mask(
+                            Text("Time Added!")
+                                .font(.custom("Bubblegum", size: 44))
+                        )
+                }
+                .scaleEffect(visible ? 1.15 : 0.7)
+                .opacity(visible ? 1.0 : 0.0)
+                .onAppear {
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) {
+                        visible = true
+                    }
+                    withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
+                        angle = 360
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        withAnimation(.easeOut(duration: 0.25)) { visible = false }
+                    }
+                }
+            }
+        }
+        .onChange(of: tick) { _, _ in
+            // retrigger animation on tick change
+            visible = false
+            angle = 0
+            DispatchQueue.main.async {
+                visible = true
+            }
+        }
     }
 }
 

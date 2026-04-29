@@ -4,7 +4,7 @@ Replace this file's contents with a short (150-300 word) reflection on your fina
 
 ## Overall Learnings
 
-Write about what you learned building your app.
+During the course of this project, I was able to recognize the limits of the chat agent regarding the 
 
 ## Challenges
 

@@ -15,10 +15,11 @@ enum GameScreen {
 struct GameConfig {
     static let rows = 5
     static let cols = 6
-    static let sessionDuration: TimeInterval = 120 // 2 minutes
+    static let sessionDuration: TimeInterval = 90 // 2 minutes
     static let dragDuration: TimeInterval = 8 // seconds
     static let baseScore = 100
     static let extraPerOrb = 50 // per orb over 3
+    static let groupExpBase: Double = 1.30 // exponential growth base for extra orbs in a group
     static let comboExpBase: Double = 1.3 // exponential combo multiplier base (>1 means growth)
 }
 
