@@ -105,6 +105,7 @@ struct GameView: View {
     let endGame: () -> Void
 
     @State private var comboPop = false
+    @State private var scorePop = false
 
     var body: some View {
         VStack(spacing: 12) {
@@ -166,10 +167,23 @@ struct GameView: View {
                 Text("Score")
                     .bubblegumStyle(size: 18)
                     .lineLimit(1)
-                Text("\(vm.score)")
-                    .bubblegumStyle(size: 34)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                ZStack {
+                    if scorePop {
+                        LinearGradient(colors: [Color.green, Color.mint, Color.green], startPoint: .leading, endPoint: .trailing)
+                            .mask(
+                                Text("\(vm.score)")
+                                    .font(.custom("Bubblegum", size: 34))
+                            )
+                            .blur(radius: 1.5)
+                            .opacity(0.9)
+                    }
+                    Text("\(vm.score)")
+                        .bubblegumStyle(size: 34)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                }
+                .scaleEffect(scorePop ? 1.15 : 1.0)
+                .animation(.spring(response: 0.16, dampingFraction: 0.7), value: scorePop)
             }
             .frame(maxWidth: .infinity, alignment: .center)
             Spacer()
@@ -185,6 +199,12 @@ struct GameView: View {
         }
         .padding(.horizontal)
         .frame(height: 72)
+        .onChange(of: vm.pointsFlyupTick) { _, _ in
+            scorePop = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                scorePop = false
+            }
+        }
     }
 
     private var pauseOverlay: some View {

@@ -16,7 +16,10 @@ final class GameViewModel: ObservableObject {
     @Published var highlightedMatches: Set<GridPosition> = []
     @Published var fadingMatches: Set<GridPosition> = []
     @Published var sessionTimeRemaining: TimeInterval = GameConfig.sessionDuration
+    @Published var lastAwardedPoints: Int = 0
+    @Published var pointsFlyupTick: Int = 0
     @Published var timeAddedTick: Int = 0
+    @Published var timeAddedAmount: Int = 0
 
     // Drag state
     @Published var isDragging: Bool = false
@@ -230,9 +233,11 @@ final class GameViewModel: ObservableObject {
                     highlightedMatches = []
                     fadingMatches = []
                     
-                    // Time bonus for very large groups
+                    // Time bonus for very large groups: 8 -> +5s, each extra orb adds +1s
                     if group.count >= 8 {
-                        sessionTimeRemaining += 5
+                        let bonus = 5 + (group.count - 8)
+                        sessionTimeRemaining += TimeInterval(bonus)
+                        timeAddedAmount = bonus
                         timeAddedTick += 1
                     }
                 }
@@ -255,16 +260,21 @@ final class GameViewModel: ObservableObject {
                 capybaraJumpTick += 1
             }
 
-            // Extra time bonus for high combo chains
+            // Extra time bonus for high combo chains: 8 -> +10s, each extra combo adds +1s
             if comboCount >= 8 {
-                sessionTimeRemaining += 10
+                let bonus = 10 + (comboCount - 8)
+                sessionTimeRemaining += TimeInterval(bonus)
+                timeAddedAmount = bonus
                 timeAddedTick += 1
             }
 
             // Apply exponential combo multiplier once all cascading is complete
             if comboCount > 0 {
                 let multiplier = pow(GameConfig.comboExpBase, Double(comboCount - 1))
-                score += Int((Double(totalMovePoints) * multiplier).rounded())
+                let awarded = Int((Double(totalMovePoints) * multiplier).rounded())
+                lastAwardedPoints = awarded
+                pointsFlyupTick += 1
+                score += awarded
                 updateHighScoreIfNeeded()
             }
 
