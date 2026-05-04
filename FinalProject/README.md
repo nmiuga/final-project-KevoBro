@@ -13,11 +13,10 @@ A casual, mobile puzzle game where a capybara gathers fruit by matching orbs. In
 - [How to Play](#how-to-play)
 - [Game Mechanics](#game-mechanics)
 - [Visual Mechanics](#visual-mechanics)
+- [Roadmap / Future Features](#roadmap--future-features)
 - [Screenshots](#screenshots)
-- [Add Your Own Screenshots (How-To)](#add-your-own-screenshots-how-to)
 - [Scoring](#scoring)
 - [Tech & Requirements](#tech--requirements)
-- [Roadmap / Future Features](#roadmap--future-features)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -35,47 +34,39 @@ When you launch the app, tap the "Start Game" button to jump into the Gameplay s
 - Stamina-limited move: A visible stamina circle limits how long you can keep dragging.
 - Matching: Groups of matching orbs clear and score points.
 - Combos: Consecutive clears generated from one drag count as combos and increase your score multiplier.
-- Round timer: The game ends after 2 minutes.
+- Performing a match of 8 or more orbs will add additional time to timer. 
+- Performing a combo of 8 or more will add additional time to timer. 
+- Round timer: The game ends after 1 minute and 30 seconds.
 
 ## Visual Mechanics
 - Combo pop-ups change color at a 3x combo.
 - After a 7x combo, pop-ups gain a rainbow effect and animation.
 - The capybara avatar performs a random animation at every multiple of 3x combo.
 
+## Roadmap / Future Features
+- Background music
+- Custom sound effects
+- Finger trail effect that adopts the color of the currently dragged fruit
+- Special ability/effect at a 10x combo
+
 ## Screenshots
 Placeholders are provided below. Replace the image paths with your own once you add screenshots to the repository (see the next section for instructions).
 
 - Title Screen
 
-  ![Title Screen Placeholder](docs/screenshots/title-screen.png "Title Screen")
+[<img src="docs/screenshots/title-screen.png" alt="Title Screen" width="320">](docs/screenshots/title-screen.png)
 
 - Puzzle Board
 
-  ![Puzzle Board Placeholder](docs/screenshots/puzzle-board.png "Puzzle Board")
+[<img src="docs/screenshots/puzzle-board.png" alt="Puzzle Board" width="320">](docs/screenshots/puzzle-board.png)
 
 - Combo Popup
 
-  ![Combo Popup Placeholder](docs/screenshots/combo-popup.png "Combo Popup")
-
-If you prefer fixed-width preview thumbnails that link to full-size images, use this HTML-style variant:
-
-[<img src="docs/screenshots/title-screen.png" alt="Title Screen" width="320">](docs/screenshots/title-screen.png)
-
-[<img src="docs/screenshots/puzzle-board.png" alt="Puzzle Board" width="320">](docs/screenshots/puzzle-board.png)
-
 [<img src="docs/screenshots/combo-popup.png" alt="Combo Popup" width="320">](docs/screenshots/combo-popup.png)
 
-## Add Your Own Screenshots (How-To)
-Follow these steps to add images to this README:
-1. Create a folder for images in your repo (recommended):
-   - docs/screenshots/
-2. Add your image files (PNG/JPEG/GIF) into that folder. Example file names:
-   - docs/screenshots/title-screen.png
-   - docs/screenshots/puzzle-board.png
-   - docs/screenshots/combo-popup.png
-3. Reference the images in Markdown:
-   - Basic syntax (uses the image at its natural size):
+
      
      ```md
      ![Title Screen](docs/screenshots/title-screen.png "Title Screen")
+
 
